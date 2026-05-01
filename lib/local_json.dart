@@ -13,26 +13,60 @@ class LocalJson extends StatefulWidget {
 class _LocalJsonState extends State<LocalJson> {
   @override
   Widget build(BuildContext context) {
-    arabalarJsonOku();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Local Json Islemleri'),
-      ), // AppBar
-      body: const Center(),
+      appBar: AppBar(title: const Text('Local Json Islemleri')), // AppBar
+      body: FutureBuilder<List<Araba>>(
+        future: arabalarJsonOku(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<Araba> arabaListesi = snapshot.data!;
+            return ListView.builder(
+              itemCount: arabaListesi.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(arabaListesi[index].arabaAdi),
+                  subtitle: Text(arabaListesi[index].ulke),
+                  leading: CircleAvatar(
+                    child: Text(arabaListesi[index].model[0].fiyat.toString()),
+                  ),
+                );
+              },
+            );
+          } else if (snapshot.hasError) {
+            return Center(child: Text(snapshot.error.toString()));
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
     ); // Scaffold
   }
-    arabalarJsonOku() async {
-    String okunanString=await DefaultAssetBundle.of(context).loadString('assets/data/arabalar.json');
 
-    var jsonObject=jsonDecode(okunanString);
-    //debugPrint(okunanString);
-    //debugPrint("******************");
-    /*
+  Future<List<Araba>> arabalarJsonOku() async {
+    try {
+      await Future.delayed(const Duration(seconds: 5), (){
+        return Future.error( '5 saniye sonraa hata çıktı' );
+      });
+      String okunanString = await DefaultAssetBundle.of(
+        context,
+      ).loadString('assets/data/arabalar.json');
+
+      var jsonObject = jsonDecode(okunanString);
+      //debugPrint(okunanString);
+      //debugPrint("******************");
+      /*
     List arabaListesi=jsonObject;
     debugPrint(arabaListesi[1]['model'][0]['fiyat'].toString());*/
 
-    List<Araba> tumArabalar=(jsonObject as List).map((arabaMap) => Araba.fromJson(arabaMap)).toList();
-    debugPrint(tumArabalar[0].model[0].modelAdi);
-    debugPrint(tumArabalar.length.toString());
+      List<Araba> tumArabalar = (jsonObject as List)
+          .map((arabaMap) => Araba.fromJson(arabaMap))
+          .toList();
+      debugPrint(tumArabalar.length.toString());
+
+      return tumArabalar;
+    } catch (e) {
+      debugPrint(e.toString());
+      return Future.error(e.toString());
+    }
   }
 }
