@@ -14,20 +14,29 @@ class _LocalJsonState extends State<LocalJson> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Local Json Islemleri')), // AppBar
+      appBar: AppBar(title:  Text(_title)), // AppBar
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _title = 'Butona Tıklandı';
+          });
+        },
+      ),
       body: FutureBuilder<List<Araba>>(
-        future: arabalarJsonOku(),
+        future: _listeyiDoldur,
+        initialData: [Araba(arabaAdi: 'aaa', ulke: 'sad', model: [Model(modelAdi: 'ccc', fiyat: 123, benzinli: false)], kurulusYili: 1928)],
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List<Araba> arabaListesi = snapshot.data!;
             return ListView.builder(
               itemCount: arabaListesi.length,
               itemBuilder: (context, index) {
+                Araba oankiAraba = arabaListesi[index];
                 return ListTile(
-                  title: Text(arabaListesi[index].arabaAdi),
-                  subtitle: Text(arabaListesi[index].ulke),
+                  title: Text(oankiAraba.arabaAdi),
+                  subtitle: Text(oankiAraba.ulke),
                   leading: CircleAvatar(
-                    child: Text(arabaListesi[index].model[0].fiyat.toString()),
+                    child: Text(oankiAraba.model[0].fiyat.toString()),
                   ),
                 );
               },
@@ -69,4 +78,13 @@ class _LocalJsonState extends State<LocalJson> {
       return Future.error(e.toString());
     }
   }
+  String _title = 'Local Json Islemleri';
+  late final Future<List<Araba>> _listeyiDoldur;
+
+  @override
+  void initState() {
+    super.initState();
+    _listeyiDoldur = arabalarJsonOku();
+  }
 }
+
